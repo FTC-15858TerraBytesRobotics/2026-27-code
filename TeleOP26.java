@@ -29,13 +29,6 @@ public class TeleOP26 extends LinearOpMode {
         //----------------------------------------
         //TELEOP
         //----------------------------------------
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "frontLeft");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "frontRight");
-        leftBackDrive = hardwareMap.get(DcMotor.class, "backLeft");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "backRight");
-
-        shooterMotor = hardwareMap.get(DcMotor.class, "shooter");
-        intakeMotor = hardwareMap.get(DcMotor.class, "intake");
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -45,12 +38,8 @@ public class TeleOP26 extends LinearOpMode {
         while (opModeIsActive()) {
 
             adjustDriveSpeed();
-            driveMecanum();
             adjustIntake();
             adjustShooter();
-
-            shooterMotor.setPower(shooterPower);
-            intakeMotor.setPower(intakePower);
 
             telemetry.addData("Drive Speed", motorSpeed);
 

@@ -7,7 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp(name = "SubSystemsTeleOP26", group = "LinearOpMode")
 public class TeleOP26 extends LinearOpMode {
-    public SubSystem26 SystemCall =  new SubSystem26();
+
+    public SubSystem26 subsystem26 =  new SubSystem26();
     private double motorSpeed = 1;
 
     // Shooter variables
@@ -15,20 +16,18 @@ public class TeleOP26 extends LinearOpMode {
     private double shooterPower = 0.0;
     private double savedShooterPower = 0.0;
     private boolean manualShooterMode = false;
-    private boolean shooterReversed = false;
 
     // Intake variables
     private double intakePower = 0.0;
     private double savedIntakePower = 0.0;
-// Recall from Subsystems
-    public void init() {
-        SystemCall.init(hardwareMap);
-    }
 
     public void runOpMode() {
         //----------------------------------------
         //TELEOP
         //----------------------------------------
+
+        // Recall from Subsystems
+        subsystem26.init(hardwareMap);
 
         telemetry.addLine("Ready!");
         telemetry.update();
@@ -36,7 +35,7 @@ public class TeleOP26 extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-
+            driveMecanum();
             adjustDriveSpeed();
             adjustIntake();
             adjustShooter();
@@ -51,9 +50,14 @@ public class TeleOP26 extends LinearOpMode {
             telemetry.addData("Shooter Power", shooterPower);
             telemetry.addData("Saved Shooter", savedShooterPower);
             telemetry.addData("Manual Mode", manualShooterMode);
-            telemetry.addData("Shooter Reversed", shooterReversed);
             telemetry.update();
         }
+    }
+    private void driveMecanum() {
+        double drive = gamepad1.left_stick_y;
+        double strafe = gamepad1.left_stick_x;
+        double rotate = gamepad1.right_stick_x;
+        subsystem26.drivetrain.driveMecanum(motorSpeed,drive,strafe,rotate);
     }
 
     // Drive speed control
@@ -64,14 +68,6 @@ public class TeleOP26 extends LinearOpMode {
         else if (gamepad1.a) motorSpeed = 1.0;
     }
 
-    // Mecanum drive math
-    private void driveMecanum() {
-        double drive = gamepad1.left_stick_y;
-        double strafe = gamepad1.left_stick_x;
-        double rotate = gamepad1.right_stick_x;
-
-    }
-
     //----------------------------------------
     //INTAKE
     //----------------------------------------
@@ -79,6 +75,7 @@ public class TeleOP26 extends LinearOpMode {
     private void adjustIntake() {
 
         double live = -gamepad2.left_stick_y;
+        subsystem26.intake.adjustIntake(intakePower);
 
         // Live control when stick is moved
         if (Math.abs(live) > 0.05) {
@@ -101,6 +98,8 @@ public class TeleOP26 extends LinearOpMode {
     //----------------------------------------
     // Shooter control (67% manual response)
     private void adjustShooter() {
+
+        subsystem26.shooter.adjustShooter(shooterPower);
 
         // Emergency stop
         if (gamepad2.right_trigger > 0.5) {
@@ -155,14 +154,6 @@ public class TeleOP26 extends LinearOpMode {
                 shooterPower = 0.75;
                 manualShooterMode = false;
                 savedShooterPower = shooterPower;
-            }
-            if (gamepad2.dpad_down) {
-                shooterMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-                shooterReversed = true;
-            }
-            if (gamepad2.dpad_up) {
-                shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-                shooterReversed = false;
             }
             // When not in manual mode, use saved shooter power
             if (!manualShooterMode) {
